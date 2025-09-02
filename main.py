@@ -6,7 +6,7 @@ import altair as alt
 
 
 def get_data():
-    df = pd.read_csv("data.csv")
+    df = pd.read_csv("income_avg_and_median.csv")
 
     df.columns = ["Location", "Avg Pretax", "Median Pretax", "Avg Aftertax", "Median Aftertax"]
     df["Avg Tax"] = df["Avg Pretax"] - df["Avg Aftertax"]
