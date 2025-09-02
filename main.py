@@ -20,41 +20,73 @@ def get_data():
 def main():
     df = get_data()
 
-    st.write("""
-# Household Income in the Greater Vancouver Area""")
     
-    median_or_average = st.radio(
-        "",
-        ["Median", "Avg"]
-    )
-    
-    chart_data = df[["Location", f"{median_or_average} Aftertax"]].copy()
-    chart_data[f"{median_or_average} Tax"] = df[f"{median_or_average} Pretax"] - df[f"{median_or_average} Aftertax"]
-    
-    melted_data = pd.melt(
-        chart_data, 
-        id_vars=['Location'], 
-        value_vars=[f"{median_or_average} Aftertax", f"{median_or_average} Tax"],
-        var_name='Type', 
-        value_name='Amount'
-    )
-    
-    max_scale = max(df["Avg Pretax"].max(), df["Median Pretax"].max())
+    income, tax_rate = st.tabs(["Income", "Taxation Rate"])
 
-    # chart = alt.Chart(melted_data).mark_bar().encode(
-    #     x=alt.X('Location:N', axis=alt.Axis(labelLimit=0)),
-    #     y=alt.Y('Amount:Q', scale=alt.Scale(domain=[0, max_scale])),
-    #     color=alt.Color('Type:N', legend=alt.Legend(orient='top')),
-    #     order=alt.Order('Type:N', sort='ascending')
-    # )
-    chart = alt.Chart(melted_data).mark_bar().encode(
-        y=alt.Y('Location:N', axis=alt.Axis(labelLimit=0)),
-        x=alt.X('Amount:Q', scale=alt.Scale(domain=[0, max_scale]), axis=alt.Axis(orient='top')),
-        color=alt.Color('Type:N', legend=alt.Legend(orient='top')),
-        order=alt.Order('Type:N', sort='ascending')
-    )
+    with income:
+        st.write("""
+    # Household Income in the Greater Vancouver Area""")
+
     
-    st.altair_chart(chart, use_container_width=True)
+        median_or_average = st.radio(
+            "",
+            ["Median", "Avg"],
+            key="income_radio"
+        )
+    
+        chart_data = df[["Location", f"{median_or_average} Aftertax"]].copy()
+        chart_data[f"{median_or_average} Tax"] = df[f"{median_or_average} Pretax"] - df[f"{median_or_average} Aftertax"]
+        
+        melted_data = pd.melt(
+            chart_data, 
+            id_vars=['Location'], 
+            value_vars=[f"{median_or_average} Aftertax", f"{median_or_average} Tax"],
+            var_name='Type', 
+            value_name='Amount'
+        )
+        
+        max_scale = max(df["Avg Pretax"].max(), df["Median Pretax"].max())
+
+        chart = alt.Chart(melted_data).mark_bar().encode(
+            y=alt.Y('Location:N', axis=alt.Axis(labelLimit=0)),
+            x=alt.X('Amount:Q', scale=alt.Scale(domain=[0, max_scale]), axis=alt.Axis(orient='top')),
+            color=alt.Color('Type:N', legend=alt.Legend(orient='top')),
+            order=alt.Order('Type:N', sort='ascending')
+        )
+        
+        st.altair_chart(chart, use_container_width=True)
+
+    with tax_rate:
+        st.write("""
+    # Household Taxation Rate in the Greater Vancouver Area""")
+
+    
+        median_or_average = st.radio(
+            "",
+            ["Median", "Avg"],
+            key="tax_rate_radio"
+        )
+    
+        chart_data = df[["Location", f"{median_or_average} Tax Rate"]].copy()
+        
+        melted_data = pd.melt(
+            chart_data, 
+            id_vars=['Location'], 
+            value_vars=[f"{median_or_average} Tax Rate"],
+            var_name='Type', 
+            value_name='Percent'
+        )
+        
+        max_scale = 1
+
+        chart = alt.Chart(melted_data).mark_bar().encode(
+            y=alt.Y('Location:N', axis=alt.Axis(labelLimit=0)),
+            x=alt.X('Percent:Q', scale=alt.Scale(domain=[0, max_scale]), axis=alt.Axis(orient='top')),
+            color=alt.Color('Type:N', legend=alt.Legend(orient='top')),
+            order=alt.Order('Type:N', sort='ascending')
+        )
+        
+        st.altair_chart(chart, use_container_width=True)
 
 
 if __name__ == "__main__":
